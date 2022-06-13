@@ -24,6 +24,7 @@ class $Promise {
                 this._callHandlers();
             }
         };
+        
         executor(this._internalResolve.bind(this), this._internalReject.bind(this));
     }
     then(successCb, errorCb) {
@@ -33,7 +34,7 @@ class $Promise {
         if (typeof errorCb !== 'function') {
             errorCb = false;
         }
-        const downstreamPromise = new $Promise((resolve, reject) => {});
+        const downstreamPromise = new $Promise(() => {});
         this._handlerGroups.push({
             successCb: successCb,
             errorCb: errorCb,
@@ -87,8 +88,37 @@ class $Promise {
     catch(errorCb){
         return this.then(null, errorCb);
     }
-     
+    static resolve(value){
+        if (value instanceof $Promise) {
+            return value;
+        }
+        return new $Promise(resolve => resolve(value));
+    }
+    static all(array){
+        if (!Array.isArray(array)) {
+            throw new TypeError("The argument is not an array");
+        }
+        const promises = array.map(value => $Promise.resolve(value));
+        return new $Promise((resolve, reject) => {
+            let resolved = 0;
+            const results = [];
+            promises.forEach((promise, index) => {
+                promise.then(
+                    value => {
+                        results[index] = value;
+                        resolved++;
+                        if (resolved === promises.length) {
+                            resolve(results);
+                        }
+                    }
+                ).catch(error => reject(error));
+            });
+        });
+
+    }
+  
 }
+
 
 
 module.exports = $Promise;
