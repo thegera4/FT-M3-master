@@ -16,33 +16,34 @@ server.use(express.json());
 
 server.post("/posts/author/:author", (req, res) => {
     const { author } = req.params;
-    const post = req.body;
-    if(!author || !post.title || !post.contents){
+    const POST = req.body;
+    if(!author || !POST.title || !POST.contents){
         return res.status(STATUS_USER_ERROR).json({
             error: "No se recibieron los parámetros necesarios para crear el Post"
         })
     }
     const NEW_POST = {
         id: ++prevId,
-        author,
-        title: post.title,
-        contents: post.contents
+        author: author,
+        title: POST.title,
+        contents: POST.contents
     }
     posts.push(NEW_POST);
     return res.json(NEW_POST);
 });
 
 server.post("/posts", (req, res) => {
-    const post = req.body;
+    const POST = req.body;
 
-    if(!post.author || !post.title || !post.contents){
+    if(!POST.author || !POST.title || !POST.contents){
         return res.status(STATUS_USER_ERROR).json({
             error: "No se recibieron los parámetros necesarios para crear el Post"
         })
     }
-    post.id = ++prevId;
-    posts.push(post);
-    return res.json(post);
+
+    POST.id = ++prevId;
+    posts.push(POST);
+    return res.json(POST);
 });
 
 server.get("/posts/:author/:title", (req, res) => {
@@ -55,16 +56,16 @@ server.get("/posts/:author/:title", (req, res) => {
 
 server.get("/posts/:author", (req, res) => {
     const { author } = req.params;
-    const result = posts.filter((post) => post.author === author);
-    return result.length !== 0 ? res.json(result) : res.status(STATUS_USER_ERROR).json({
+    const RESULT = posts.filter((post) => post.author === author);
+    return RESULT.length !== 0 ? res.json(RESULT) : res.status(STATUS_USER_ERROR).json({
         error: "No existe ningun post del autor indicado"
     });
 });
 
 server.get("/posts", (req, res) => {
     if(req.query.term){
-        const result = posts.filter((post) => post.title.includes(req.query.term) || post.contents.includes(req.query.term))
-        return res.json(result)
+        const RESULT = posts.filter((post) => post.title.includes(req.query.term) || post.contents.includes(req.query.term))
+        return res.json(RESULT)
     }
     return res.json(posts);
 });
@@ -78,18 +79,18 @@ server.put("/posts", (req, res) => {
         })
     }
     
-    const post = posts.find((post) => post.id === id);
+    const POST = posts.find((post) => post.id === id);
 
-    if(!post){
+    if(!POST){
         return res.status(STATUS_USER_ERROR).json({
             error: "El id no corresponde con un Post existente"
         })
     }
 
-    post.title = title;
-    post.contents = contents;
+    POST.title = title;
+    POST.contents = contents;
 
-    return res.json(post);
+    return res.json(POST);
 })
 
 server.delete("/posts", (req, res) => {
@@ -101,16 +102,15 @@ server.delete("/posts", (req, res) => {
         })
     }
 
-    const post = posts.find((post) => post.id === id);
+    const POST = posts.find((post) => post.id === id);
 
-    if(!post){
+    if(!POST){
         return res.status(STATUS_USER_ERROR).json({
             error: "El id no corresponde con un Post existente"
         })
     }
 
     posts = posts.filter((post) => post.id !== id);
-
     return res.json({success: true});
 
 });
@@ -133,12 +133,8 @@ server.delete("/author", (req, res) => {
     }
 
     posts = posts.filter((post) => post.author !== author);
-
     return res.json(POST_AUTHOR);
 
 })
-
-
-
 
 module.exports = { posts, server };
